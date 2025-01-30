@@ -1,8 +1,8 @@
 // Select DOM elements
 const canvasPart = document.querySelector(".canvas-part");
 const previewPart = document.querySelector(".preview-part");
-// const canvas = document.getElementById("canvas");
-const canvas = document.querySelector('.canvas-part canvas');
+const canvas = document.getElementById("canvas");
+// const canvas = document.querySelector('.canvas-part canvas');
 // const ctx = canvas.getContext("2d");
 const captureButton = document.getElementById("captureButton");
 const backButton = document.getElementById("backButton");
