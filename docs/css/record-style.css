@@ -1,0 +1,278 @@
+/* CSS Variables for consistency */
+:root {
+    --bg-color: #000;
+    --border-radius: 20px;
+    --transition-speed: 0.5s;
+    --control-size: 90px;
+    --button-color: orangered;
+    --button-shadow: rgba(0, 0, 0, 0.3);
+    --progress-bar-height: 2px;
+  }
+  
+  /* General resets */
+  body,
+  html {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: "Arial", sans-serif;
+    background-color: var(--bg-color);
+    --webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    -webkit-user-select: none;
+    user-select: none;
+    height: 100%;
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .container {
+    background-color: var(--bg-color);
+    --webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    -webkit-user-select: none;
+    user-select: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    max-width: 720px;
+  }
+  
+  @media screen and (max-width: 380px) {
+    .container {
+      align-items: start;
+    }
+  }
+  
+  /* Centering and scaling canvas part */
+  .canvas-part {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    max-width: 720px;
+    height: 100%;
+    opacity: 1;
+    transition: width var(--transition-speed) ease,
+      height var(--transition-speed) ease, opacity 0.4s ease;
+    --webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  
+  /* Canvas styling */
+  canvas {
+    width: 100%;
+    height: 100%;
+    transition: width var(--transition-speed) ease,
+      height var(--transition-speed) ease, opacity var(--transition-speed) ease;
+    display: none;
+    user-select: none;
+    z-index: 10;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    --webkit-tap-highlight-color: transparent;
+    object-fit: cover;
+  }
+  
+  /* Class to display active elements */
+  .active {
+    display: block;
+  }
+  
+  /* Preview part styling */
+  .preview-part {
+    padding-top: 5px;
+    width: 90%;
+    max-width: 720px;
+    height: 100%;
+    display: none;
+    flex-direction: column;
+    justify-content: start;
+    align-items: center;
+    border-radius: var(--border-radius);
+    scale: 1.3;
+    transition: width 0.1s ease, height var(--transition-speed) ease,
+      scale 0.3s ease;
+    --webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  
+  /* Preview image styling */
+  .preview {
+    width: 100%;
+    height: 85%;
+    border: 3px solid black;
+    background-color: black;
+    overflow: hidden;
+    border-radius: var(--border-radius);
+    transition: width var(--transition-speed) ease,
+      height var(--transition-speed) ease, opacity var(--transition-speed) ease;
+    position: relative;
+  }
+  
+  /* Centering preview image */
+  .preview-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  /* Controls visibility */
+  .controls {
+    width: 100%;
+    display: none;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 999;
+    position: relative;
+    height: 13%;
+  }
+  
+  /* Capture button */
+  .capture-btn {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    z-index: 999;
+    width: var(--control-size);
+    height: var(--control-size);
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    -webkit-user-select: none;
+    touch-action: manipulation; /* Allows scrolling and zooming, but disables text selection and double-tap-to-zoom */
+    -webkit-touch-callout: none;
+    user-select: none;
+    -webkit-user-select: none;
+    --webkit-tap-highlight-color: transparent;
+  }
+  
+  /* SVG styling */
+  svg {
+    position: relative;
+    width: 90%;
+    height: 95%;
+    max-width: var(--control-size) !important;
+    max-height: var(--control-size) !important;
+    transform: rotate(-90deg);
+    z-index: 999;
+    display: block;
+    -webkit-user-select: none;
+    touch-action: manipulation; /* Allows scrolling and zooming, but disables text selection and double-tap-to-zoom */
+    -webkit-touch-callout: none;
+    user-select: none;
+    -webkit-user-select: none;
+    --webkit-tap-highlight-color: transparent;
+  }
+  
+  circle {
+    -webkit-user-select: none;
+    touch-action: manipulation; /* Allows scrolling and zooming, but disables text selection and double-tap-to-zoom */
+    -webkit-touch-callout: none;
+    user-select: none;
+    -webkit-user-select: none;
+    --webkit-tap-highlight-color: transparent;
+    z-index: 999;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  
+  .inner-circle {
+    transform-origin: center center;
+    transition: scale 0.5s ease;
+  }
+  
+  /* Progress ring */
+  .inner-circle:hover {
+    scale: 0.8 !important;
+    cursor: pointer;
+    transition: scale 0.5s ease;
+  }
+  
+  .progress-ring__circle {
+    transition: stroke-dashoffset 0.25s, scale 0.25s ease, stroke 0.2s ease,
+      r 0.2s ease;
+  }
+  .outer-circle {
+    transition: stroke-dashoffset 0.25s, scale 0.25s ease, stroke 0.2s ease,
+      r 0.2s ease;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .outer-circle:hover {
+    transition: stroke-dashoffset 0.35s, scale 0.5s ease;
+  }
+  
+  /* Back button */
+  #backButton {
+    cursor: pointer;
+    filter: invert();
+    padding: 10px 15px;
+    width: 30px !important;
+    height: 30px !important;
+    user-select: none;
+    -webkit-user-select: none;
+    --webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  }
+  
+  /* Action button */
+  .action-btn {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: max-content;
+    transform: translate(-50%, -50%);
+    background-color: var(--button-color);
+    color: white;
+    border-radius: 25px;
+    padding: 12px 15px;
+    box-shadow: 0 2px 8px var(--button-shadow);
+    cursor: pointer;
+    z-index: 10;
+    font-size: large;
+    font-weight: 500;
+    user-select: none;
+    -webkit-user-select: none;
+    --webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  }
+  
+  /* Progress bar */
+  .progress-parent {
+    width: 95%;
+    height: max-content;
+    display: none;
+    flex-direction: column;
+    justify-content: start;
+    align-items: center;
+    margin-top: 20px;
+    z-index: 999;
+    margin: 20px auto;
+  }
+  
+  .video-progress-bar {
+    height: var(--progress-bar-height);
+    border-radius: 10px;
+    background-color: #fff;
+    z-index: 999;
+  }
+  
+  .video-progress-bar-sudo {
+    content: "";
+    width: 100%;
+    height: var(--progress-bar-height);
+    z-index: 999;
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+  

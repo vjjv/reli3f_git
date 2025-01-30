@@ -1,2 +1,1 @@
-# reli3f_git
- Sky
+# camera_kit_demo
