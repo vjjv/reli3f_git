@@ -651,8 +651,17 @@ actionButton.addEventListener("click", async () => {
       try {
         const response = await fetch(videoElement.src);
         const blob = await response.blob();
-        const files = [new File([blob], "video.webm", { type: "video/webm" })];
-        await navigator.share({ files });
+        
+        //v1 fiverr
+        // const files = [new File([blob], "video.webm", { type: "video/webm" })];
+        // await navigator.share({ files });
+
+        //v2 baba
+        const file = new File([blob], "video.mp4", { type: "video/mp4" });
+        await navigator.share({
+          // title: "Example File",
+          files: [file]
+        });
       } catch (err) {
         console.error("Error sharing video", err);
       }
