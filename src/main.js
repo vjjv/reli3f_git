@@ -10,14 +10,14 @@ import {
     var cameraKit = await bootstrapCameraKit({ apiToken: 'eyJhbGciOiJIUzI1NiIsImtpZCI6IkNhbnZhc1MyU0hNQUNQcm9kIiwidHlwIjoiSldUIn0.eyJhdWQiOiJjYW52YXMtY2FudmFzYXBpIiwiaXNzIjoiY2FudmFzLXMyc3Rva2VuIiwibmJmIjoxNjk4MDU3NzAyLCJzdWIiOiI0MDUyY2RlNC02YzMzLTRkM2UtYTJjNC0yNzllYzc1M2VmOWR-U1RBR0lOR341MTY4YzVmNC1kYWVkLTQ1N2ItOGJmYy01Y2JhODkwOWU4OTgifQ.b0Z-TegYa2Sg-lZy_8XoPw7f_iz7eEC5BtzYooyL5K4' })
 
     //v1
-    const session = await cameraKit.createSession();
-    document.getElementById('canvas').replaceWith(session.output.live);
-    const canvas = document.querySelector('.canvas-part canvas');
-    canvas.style.display = 'block';
+    // const session = await cameraKit.createSession();
+    // document.getElementById('canvas').replaceWith(session.output.live);
+    // const canvas = document.querySelector('.canvas-part canvas');
+    // canvas.style.display = 'block';
     
     //v2
-    // const canvas = document.getElementById('canvas');
-    // const session = await cameraKit.createSession({ liveRenderTarget: canvas });
+    const canvas = document.getElementById('canvas');
+    const session = await cameraKit.createSession({ liveRenderTarget: canvas });
 
     
     //v2 go to https://my-lenses.snapchat.com -> lens scheduler to define group and lens to apply
