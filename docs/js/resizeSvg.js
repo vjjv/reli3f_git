@@ -1,4 +1,4 @@
- //resize the SVG element based on the canvas size
+ //resize the SVG element based on the canvas sizee 
  function resizeSvg(scale = 1) {
     const svgContainer = document.getElementById("captureButton");
     const svg = document.getElementById("progressRing");
