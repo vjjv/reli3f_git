@@ -234,7 +234,7 @@ function stopRecording() {
 
 // dinfing the record time variables
 let recordTime = 0;
-const totalRecordTime = 5000; // 5 seconds for video recording
+const totalRecordTime = 15000; // 5 seconds for video recording
 
 // svg ring responsible for animation inside capture buttton
 const circle = document.querySelector(".progress-ring__circle");

@@ -203,6 +203,8 @@
   .progress-ring__circle {
     transition: stroke-dashoffset 0.25s, scale 0.25s ease, stroke 0.2s ease,
       r 0.2s ease;
+    stroke-dasharray: 500; /* baba fixed red color when record as anim does not work*/
+    stroke-dashoffset: 0;  /* baba fixed red color when record as anim does not work*/
   }
   .outer-circle {
     transition: stroke-dashoffset 0.25s, scale 0.25s ease, stroke 0.2s ease,
