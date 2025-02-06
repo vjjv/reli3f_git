@@ -177,7 +177,7 @@ async function startRecording() {
     });
     recorder.startRecording();
     recording = true;
-    updateProgress(); // baba test
+    // updateProgress(); // baba test
     // change the default behaviour of capture button to act as a zoom plate while recording
     if (recording) {
       resizeSvg(1.1);
@@ -259,7 +259,7 @@ function updateProgress() {
     stopRecording();
     resetProgress();
   }
-  while(recording) updateProgress(); //baba test
+  // while(recording) updateProgress(); //baba test
 }
 
 function resetProgress() {
