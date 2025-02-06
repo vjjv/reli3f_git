@@ -1,4 +1,4 @@
-// Select DOM elementss
+// Select DOM elements
 const canvasPart = document.querySelector(".canvas-part");
 const previewPart = document.querySelector(".preview-part");
 const canvas = document.getElementById("canvas");
@@ -9,7 +9,7 @@ const backButton = document.getElementById("backButton");
 const progressParentDiv = document.querySelector(".progress-parent");
 const videoProgressBar = document.getElementById("videoProgressBar");
 const progressRing = document.getElementById("progressRing");
-const controlPannel = document.querySelector(".controls"); 
+const controlPannel = document.querySelector(".controls");
 
 // Initialize variables
 
@@ -56,379 +56,371 @@ videoCanvas.style.cssText = `
   display: block;
 `;
 
-let videoCTX = videoCanvas.getContext("2d");
+  // Configure action button
+  elements.actionButton.classList.add("action-btn");
+  document.body.appendChild(elements.actionButton);
+  elements.controlPannel.appendChild(elements.actionButton);
 
-function playVideoOnCanvas(recordedVideoURL) {
-  videoElement.src = recordedVideoURL;
-  videoElement.loop = true;
-  videoElement.muted = true;
-  videoElement.autoplay = true; // Autoplay the video
-  videoElement.playsInline = true; // Allow inline playback on mobile
+  return elements;
+})();
 
-  const spinLoading = document.querySelector(".spin-loading");
-  spinLoading.style.display = "block";
-  spinLoading.width = innerWidth + "px";
-  spinLoading.height = innerHeight + "px";
+// ======================
+// Module 2: State Management
+// ======================
+const State = (() => {
+  let state = {
+    mediaRecorder: null,
+    chunks: [],
+    recording: false,
+    videoIsDisplayed: false,
+    holdTimeout: null,
+    videoPlayInterval: null,
+    zoomFactor: 1,
+    zoomOriginX: 0,
+    zoomOriginY: 0,
+    isDragging: false,
+    lastTouchY: 0,
+    lastRenderTime: 0,
+    customFPS: 30,
+    frameDuration: 1000 / 30,
+    ProgressInterval: null,
+    hearts: [],
+    heartColors: [
+      "rgba(255, 0, 0, 0.2)",
+      "rgba(255, 100, 100, 0.2)",
+      "rgba(255, 0, 100, 0.2)",
+    ],
+    recordTime: 0,
+    totalRecordTime: 5000,
+    lastX: 0,
+    lastY: 0,
+    lastTouchDist: 0,
+    activePointers: new Map(),
+    linearGradient: null,
+  };
 
-  // Wait for metadata to load before setting canvas dimensions and playing the video
-  videoElement.addEventListener("loadedmetadata", () => {
-    spinLoading.style.display = "none";
-    // Set canvas dimensions to match the video resolution
-    videoCanvas.width = videoElement.videoWidth;
-    videoCanvas.height = videoElement.videoHeight;
+  // Initialize linear gradient
+  // state.linearGradient = DomElements.ctx.createLinearGradient(
+  //   0,
+  //   0,
+  //   0,
+  //   DomElements.canvas.height * 2
+  // );
+  // state.linearGradient.addColorStop(0, "rgb(52, 208, 235)");
+  // state.linearGradient.addColorStop(0.4, "rgb(222, 208, 200)");
+  // state.linearGradient.addColorStop(1, "rgb(48, 23, 221)");
 
-    // Play the video
-    videoElement.play();
+  return {
+    get: () => state,
+    update: (newState) => {
+      state = { ...state, ...newState };
+    },
+  };
+})();
 
-    // Draw the video frames on the canvas
-    videoElement.addEventListener("play", function () {
-      const updateCanvas = () => {
-        updateTopProgressBar();
-        if (!videoElement.paused && !videoElement.ended) {
-          // Clear the canvas before drawing a new frame
-          videoCTX.clearRect(0, 0, videoCanvas.width, videoCanvas.height);
+// ======================
+// Module 3: Progress Management
+// ======================
+const ProgressManager = (() => {
+  const updateProgress = () => {
+    const state = State.get();
+    Utils.circle.style.strokeDasharray = `${Utils.circumference + 20}`;
 
-          // Calculate aspect ratio
-          const videoAspectRatio =
-            videoElement.videoWidth / videoElement.videoHeight;
-          const canvasAspectRatio = videoCanvas.width / videoCanvas.height;
+    state.recordTime += state.frameDuration;
+    const percentage = Math.min(state.recordTime / state.totalRecordTime, 1);
+    const offset = Utils.circumference - percentage * Utils.circumference;
 
-          let drawWidth, drawHeight, offsetX, offsetY;
+    Utils.circle.style.strokeDashoffset = offset;
 
-          // Maintain aspect ratio while centering the video
-          if (canvasAspectRatio > videoAspectRatio) {
-            // Fit video height to canvas
-            drawHeight = videoCanvas.height;
-            drawWidth = videoCanvas.height * videoAspectRatio;
-            offsetX = (videoCanvas.width - drawWidth) / 2; // Center horizontally
-            offsetY = 0;
-          } else {
-            // Fit video width to canvas
-            drawWidth = videoCanvas.width;
-            drawHeight = videoCanvas.width / videoAspectRatio;
-            offsetX = 0;
-            offsetY = (videoCanvas.height - drawHeight) / 2; // Center vertically
-          }
+    if (state.recordTime >= state.totalRecordTime) {
+      MediaRecorderManager.stopRecording();
+      resetProgress();
+    }
+  };
 
-          // Draw the video frame on the canvas
-          videoCTX.drawImage(
-            videoElement,
-            offsetX,
-            offsetY,
-            drawWidth,
-            drawHeight
-          );
+  const resetProgress = () => {
+    State.update({ recordTime: 0 });
+    Utils.circle.style.strokeDashoffset = `${Utils.circumference}`;
+    Utils.circle.style.stroke = "none";
+    document.querySelector(".outer-circle").style.stroke =
+      "rgba(255,255,255,1)";
+  };
 
-          // Continuously update the canvas with the next video frame
-        }
-      };
-      videoPlayInterval = setInterval(updateCanvas, 1000 / customFPS);
-    });
-  });
-}
+  return { updateProgress, resetProgress };
+})();
 
-// Call this to stop video rendering when needed (optional cleanup)
-function stopVideoPlayback() {
-  videoElement.pause();
-  videoCTX.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
-  videoElement.src = ""; // Remove video source
-}
+// ======================
+// Module 4: Media Recorder Management
+// ======================
+const MediaRecorderManager = (() => {
+  let recorder;
 
-// Pointer and gesture handling
-let isPointerDown = false;
-let lastPointerX = 0;
-let lastPointerY = 0;
-let activePointers = new Map();
-let lastTouchDist = 0;
+  const startRecording = async () => {
+    try {
+      const state = State.get();
+      const videoStream = DomElements.canvas.captureStream(state.customFPS);
 
-// Utility: Detect if device is mobile
-const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+      recorder = RecordRTC(videoStream, {
+        type: "video",
+        mimeType: "video/mp4",
+      });
 
-// Initialize MediaRecorder with canvas stream
-function initializeMediaRecorder(stream) {
-  const mimeType = getSupportedMimeType();
-  if (!mimeType) {
-    alert("Your browser does not support any of the required video formats.");
-    return null;
-  }
+      recorder.startRecording();
+      State.update({ recording: true });
 
-  const options = { mimeType };
-
-  try {
-    const recorder = new MediaRecorder(stream, options);
-    return recorder;
-  } catch (e) {
-    console.error("Failed to create MediaRecorder:", e);
-    alert("Failed to initialize video recording.");
-    return null;
-  }
-}
-
-let recorder;
-// Start recording
-async function startRecording() {
-  try {
-    // Capture stream from canvas
-    const videoStream = canvas.captureStream(customFPS);
-
-    recorder = RecordRTC(videoStream, {
-      type: "video",
-      mimeType: "video/mp4", // Supports MP4 for Safari/Epiphany
-    });
-    recorder.startRecording();
-    recording = true;
-    // change the default behaviour of capture button to act as a zoom plate while recording
-    if (recording) {
-      resizeSvg(1.1);
-      captureButton.style.width = "100%";
-      captureButton.style.height = "100%";
+      // Update UI for recording state
+      UI.resizeSvg(1.1); // Update this line
+      DomElements.captureButton.style.cssText = `
+        width: 100%;
+        height: 100%;
+      `;
       document.querySelector(".progress-ring__circle").style.stroke = "#ff0000";
       document.querySelector(".outer-circle").style.stroke =
         "rgba(255,255,255,0.4)";
       document.querySelector(".inner-circle").style.fill = "#ff0000";
       document.querySelector(".inner-circle").style.scale = "0.8";
+    } catch (err) {
+      console.error("Error starting recording:", err);
+      alert("Failed to start recording.");
     }
-  } catch (err) {
-    console.error("Error starting recording:", err);
-    alert("Failed to start recording.");
-  }
-}
+  };
 
-// Stop recording
-function stopRecording() {
-  if (recorder && recording) {
-    previewPart.style.display = "flex";
-    document.getElementById("preview-img").style.display = "none";
-    videoCanvas.style.display = "block";
-    videoIsDisplayed = true;
-    progressParentDiv.style.display = "flex";
-    canvasPart.style.display = "none";
-    canvasPart.style.opacity = 0;
-    controlPannel.style.display = "flex";
-    updateActionButtonLabel("video");
-    captureButton.style.display = "none";
+  const stopRecording = () => {
+    const state = State.get();
+    if (!recorder || !state.recording) return;
 
-    // set to default behaviour of capture button
-    captureButton.style.width = "90px";
-    captureButton.style.height = "90px";
-    document.querySelector(".inner-circle").style.fill = "#ffff";
-    document.querySelector(".inner-circle").style.scale = "1";
-    //set the default behaviour of zoom of canvas contents
-    zoomFactor = 1;
-
+    // Update UI elements
+    DomElements.previewPart.style.display = "flex";
     setTimeout(() => {
-      previewPart.style.scale = 1;
-    }, 50);
+      DomElements.previewPart.style.scale = "1";
+    }, 20);
+    DomElements.previewImg.style.display = "none";
+    DomElements.videoCanvas.style.display = "block";
+    DomElements.progressParentDiv.style.display = "flex";
+    DomElements.canvasPart.style.display = "none";
+    DomElements.controlPannel.style.display = "flex";
+    DomElements.captureButton.style.display = "none";
+
+    // Reset capture button styling
+    DomElements.captureButton.style.cssText = `
+      width: 90px;
+      height: 90px;
+    `;
+    document.querySelector(".inner-circle").style.cssText = `
+      fill: #ffff;
+      scale: 1;
+    `;
+
     recorder.stopRecording(() => {
       const blob = recorder.getBlob();
       const videoURL = URL.createObjectURL(blob);
-      videoElement.src = ""; // Clear existing video
-
-      playVideoOnCanvas(videoURL); // Assign new video
-      // Small delay to ensure rendering
+      VideoManager.playVideoOnCanvas(videoURL);
     });
-    recording = false;
-  }
-}
 
-// dinfing the record time variables
-let recordTime = 0;
-const totalRecordTime = 5000; // 5 seconds for video recording
-
-// svg ring responsible for animation inside capture buttton
-const circle = document.querySelector(".progress-ring__circle");
-const radius = circle.r.baseVal.value;
-const circumference = 2 * Math.PI * radius;
-
-//the circumference of the circle
-circle.style.strokeDasharray = `${circumference}`;
-circle.style.strokeDashoffset = `${circumference}`;
-
-//function for update the top progress bar
-function updateProgress() {
-  circle.style.strokeDasharray = `${circumference + 20}`;
-
-  recordTime += frameDuration;
-  const percentage = Math.min(recordTime / totalRecordTime, 1);
-
-  const offset = circumference - percentage * circumference;
-
-  circle.style.strokeDashoffset = offset; // Update the stroke dash offset
-  if (recordTime >= totalRecordTime) {
-    stopRecording();
-    resetProgress();
-  }
-}
-
-function resetProgress() {
-  recordTime = 0;
-  circle.style.strokeDashoffset = `${circumference}`;
-  circle.style.stroke = "none";
-  document.querySelector(".outer-circle").style.stroke = "rgba(255,255,255,1)";
-}
-
-// ctx.save();
-// draw the linear gradient
-// const linearGradient = ctx.createLinearGradient(0, 0, 0, canvas.height * 2);
-// linearGradient.addColorStop(0, "rgb(52, 208, 235)");
-// linearGradient.addColorStop(0.4, "rgb(222, 208, 200)");
-// linearGradient.addColorStop(1, "rgb(48, 23, 221)");
-
-// ctx.fillStyle = linearGradient;
-// ctx.fillRect(0, 0, canvas.width, canvas.height);
-// Drawing and animation
-// function draw(timestamp) {
-//   const timeSinceLastRender = timestamp - lastRenderTime;
-
-//   if (timeSinceLastRender >= frameDuration) {
-//     // Clear canvas
-//     ctx.save();
-//     ctx.clearRect(0, 0, canvas.width, canvas.height);
-//     ctx.fillStyle = linearGradient;
-//     ctx.fillRect(0, 0, canvas.width, canvas.height);
-//     // Apply zoom and pan
-//     ctx.setTransform(zoomFactor, 0, 0, zoomFactor, zoomOriginX, zoomOriginY);
-
-//     // Draw text
-//     ctx.font = `${40 * zoomFactor}px sans`;
-//     ctx.textAlign = "center";
-//     ctx.textBaseline = "middle";
-//     ctx.fillStyle = "white";
-//     ctx.fillText("Hello world", 0, 0);
-//     ctx.restore();
-
-//     // Update progress bar if recording
-//     if (recording) {
-//       updateProgress();
-//     }
-//     lastRenderTime = timestamp;
-//   }
-
-  // Animate hearts
-  // animateHearts();
-  // addHeart();
-
-  // requestAnimationFrame(draw);
-// }
-
-function resizeCanvas() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-  zoomOriginX = canvas.width / 2;
-  zoomOriginY = canvas.height / 2;
-}
-
-// Initialize canvas size and start animation
-window.addEventListener("resize", resizeCanvas);
-resizeCanvas();
-// requestAnimationFrame(draw);
-
-// Heart management
-function addHeart() {
-  if (hearts.length >= 5) return; // Limit the number of hearts
-
-  const heart = {
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
-    size: Math.random() * 25 + 15,
-    opacity: Math.random() * 0.5 + 0.5,
-    speed: Math.random() * 2 + 0.5,
-    gradient: createPurpleGradient(),
-    glow: true,
-    glowIntensity: 20, // Initial glow intensity (shadowBlur)
-    glowDirection: 1, // 1 for increasing, -1 for decreasing
-    glowSpeed: 0.8, // Speed of the glow change
+    State.update({
+      recording: false,
+      zoomFactor: 1,
+      videoIsDisplayed: true,
+    });
   };
 
-  hearts.push(heart);
-}
+  return { startRecording, stopRecording };
+})();
 
-// function createPurpleGradient() {
-//   const gradient = ctx.createRadialGradient(0, 0, 5, 0, 0, 20);
-//   gradient.addColorStop(0, "rgba(128, 0, 128, 0.9)"); // Inner bright purple
-//   gradient.addColorStop(1, "rgba(230, 230, 250, 0.8)"); // Outer lavender (slightly transparent)
-//   return gradient;
-// }
+// ======================
+// Module 5: Video Management
+// ======================
+const VideoManager = (() => {
+  const playVideoOnCanvas = (recordedVideoURL) => {
+    const state = State.get();
+    DomElements.spinLoading.style.display = "block";
 
-// function animateHearts() {
-//   hearts.forEach((heart, index) => {
-//     ctx.save();
-//     ctx.globalAlpha = heart.opacity;
+    DomElements.videoElement.src = recordedVideoURL;
+    DomElements.videoElement.loop = true;
+    DomElements.videoElement.muted = true;
+    DomElements.videoElement.autoplay = true;
+    DomElements.videoElement.playsInline = true;
 
-//     // Interpolate the glow intensity
-//     if (heart.glow) {
-//       heart.glowIntensity += heart.glowDirection * heart.glowSpeed;
+    DomElements.videoElement.addEventListener("loadedmetadata", () => {
+      DomElements.spinLoading.style.display = "none";
+      DomElements.videoCanvas.width = DomElements.videoElement.videoWidth;
+      DomElements.videoCanvas.height = DomElements.videoElement.videoHeight;
 
-//       // Reverse direction if it reaches the bounds (min: 5, max: 30)
-//       if (heart.glowIntensity >= 30) {
-//         heart.glowDirection = -1.5;
-//       } else if (heart.glowIntensity <= 5) {
-//         heart.glowDirection = 1;
-//       }
+      const videoCTX = DomElements.videoCanvas.getContext("2d");
+      DomElements.videoElement.play();
 
-//       // Apply the glow effect with interpolated intensity
-//       ctx.shadowBlur = heart.glowIntensity;
-//       ctx.shadowColor = "rgba(255, 0, 255, 0.8)";
-//       ctx.shadowOffsetX = 0;
-//       ctx.shadowOffsetY = 0;
-//     }
-//     // adjusted the x and y coordination based on the user prefered zoom scale
-//     const adjustedX = (heart.x - zoomOriginX) * zoomFactor + zoomOriginX;
-//     const adjustedY = (heart.y - zoomOriginY) * zoomFactor + zoomOriginY;
+      state.videoPlayInterval = setInterval(() => {
+        if (DomElements.videoElement.paused || DomElements.videoElement.ended)
+          return;
 
-//     ctx.translate(adjustedX, adjustedY);
-//     //based on glow intensity, change the fill color
-//     ctx.fillStyle =
-//       heart.glowIntensity > 10
-//         ? heart.gradient
-//         : heart.gradient.addColorStop(heart.glowIntensity / 30, "white") ||
-//           "rgba(255, 255, 255, 0.2)";
+        videoCTX.clearRect(
+          0,
+          0,
+          DomElements.videoCanvas.width,
+          DomElements.videoCanvas.height
+        );
+        const aspectRatio =
+          DomElements.videoElement.videoWidth /
+          DomElements.videoElement.videoHeight;
 
-//     // Draw the heart shape
-//     drawHeart(ctx, 0, 0, heart.size);
+        // Aspect ratio handling
+        let drawWidth, drawHeight, offsetX, offsetY;
+        if (
+          DomElements.videoCanvas.width / DomElements.videoCanvas.height >
+          aspectRatio
+        ) {
+          drawHeight = DomElements.videoCanvas.height;
+          drawWidth = DomElements.videoCanvas.height * aspectRatio;
+          offsetX = (DomElements.videoCanvas.width - drawWidth) / 2;
+          offsetY = 0;
+        } else {
+          drawWidth = DomElements.videoCanvas.width;
+          drawHeight = DomElements.videoCanvas.width / aspectRatio;
+          offsetY = (DomElements.videoCanvas.height - drawHeight) / 2;
+          offsetX = 0;
+        }
 
-//     ctx.restore();
+        videoCTX.drawImage(
+          DomElements.videoElement,
+          offsetX,
+          offsetY,
+          drawWidth,
+          drawHeight
+        );
 
-//     // Move the heart upwards
-//     heart.y -= heart.speed;
+        VideoManager.updateTopProgressBar(); // Add this line
+      }, 1000 / state.customFPS);
+    });
+  };
 
-//     // Remove hearts that are out of bounds
-//     if (heart.y + heart.size < 0) {
-//       hearts.splice(index, 1);
-//     }
-//   });
-// }
+  const stopVideoPlayback = () => {
+    DomElements.videoElement.pause();
+    DomElements.videoCanvas
+      .getContext("2d")
+      .clearRect(
+        0,
+        0,
+        DomElements.videoCanvas.width,
+        DomElements.videoCanvas.height
+      );
+    DomElements.videoElement.src = "";
+  };
 
-// function drawHeart(ctx, x, y, size) {
-//   ctx.beginPath();
-//   ctx.moveTo(x, y + size / 4);
-//   ctx.bezierCurveTo(x, y, x - size / 2, y, x - size / 2, y + size / 4);
-//   ctx.bezierCurveTo(x - size / 2, y + size / 2, x, y + size / 2, x, y + size);
-//   ctx.bezierCurveTo(
-//     x,
-//     y + size / 2,
-//     x + size / 2,
-//     y + size / 2,
-//     x + size / 2,
-//     y + size / 4
-//   );
-//   ctx.bezierCurveTo(x + size / 2, y, x, y, x, y + size / 4);
-//   ctx.closePath();
-//   ctx.fill();
-// }
+  const updateTopProgressBar = () => {
+    const progress =
+      (DomElements.videoElement.currentTime /
+        DomElements.videoElement.duration) *
+      100;
+    DomElements.videoProgressBar.style.width = `${progress}%`;
+  };
 
-// Touch events for pinch-to-zoom
-canvas.addEventListener(
-  "touchmove",
-  (e) => {
-    e.preventDefault(); // Prevent scroll
-    if (isDragging && e.touches.length === 1) {
-      const dx = e.touches[0].clientX - lastX;
-      const dy = e.touches[0].clientY - lastY;
-      zoomOriginX += dx;
-      zoomOriginY += dy;
-      lastX = e.touches[0].clientX;
-      lastY = e.touches[0].clientY;
+  return { playVideoOnCanvas, stopVideoPlayback, updateTopProgressBar };
+})();
+
+// ======================
+// Module 6: Canvas Drawing
+// ======================
+const CanvasRenderer = (() => {
+  const draw = (timestamp) => {
+    const state = State.get();
+    const timeSinceLastRender = timestamp - state.lastRenderTime;
+
+    if (timeSinceLastRender >= state.frameDuration) {
+      
+
+      // Apply zoom/pan transformations
+      DomElements.ctx.setTransform(
+        state.zoomFactor,
+        0,
+        0,
+        state.zoomFactor,
+        state.zoomOriginX,
+        state.zoomOriginY
+      );
+
+     
+
+      // Update progress if recording
+      if (state.recording) ProgressManager.updateProgress();
+
+      State.update({ lastRenderTime: timestamp });
+    }
+
+    // animateHearts();
+    // addHeart();
+    requestAnimationFrame(draw);
+  };
+
+
+
+
+  
+
+  return { draw };
+})();
+
+// ======================
+// Module 7: Event Handlers
+// ======================
+const EventHandlers = (() => {
+  const initialize = () => {
+    // Canvas interaction events
+    DomElements.canvas.addEventListener("touchmove", handleTouchMove, {
+      passive: false,
+    });
+    DomElements.canvas.addEventListener("touchstart", handleTouchStart, {
+      passive: false,
+    });
+    DomElements.canvas.addEventListener("touchend", handleTouchEnd, {
+      passive: false,
+    });
+    DomElements.canvas.addEventListener("touchcancel", handleTouchCancel, {
+      passive: false,
+    });
+    DomElements.canvas.addEventListener("wheel", handleMouseWheel, {
+      passive: false,
+    });
+    DomElements.canvas.addEventListener("mousemove", handleMouseMove);
+    DomElements.canvas.addEventListener("mousedown", handleMouseDown);
+    DomElements.canvas.addEventListener("mouseup", handleMouseUp);
+    DomElements.canvas.addEventListener("mouseleave", handleMouseLeave);
+
+    // Capture button events
+    DomElements.captureButton.addEventListener(
+      "pointerdown",
+      handleCaptureStart
+    );
+    DomElements.captureButton.addEventListener("pointerup", handleCaptureEnd);
+    DomElements.captureButton.addEventListener(
+      "pointercancel",
+      handleCaptureCancel
+    );
+
+    // Control buttons
+    DomElements.backButton.addEventListener("click", handleBackClick);
+    DomElements.actionButton.addEventListener("click", handleActionClick);
+
+    // Window resize
+    window.addEventListener("resize", handleResize);
+
+    // Add initial resize
+    handleResize(); // Add this line
+  };
+
+  // Touch Handling
+  const handleTouchMove = (e) => {
+    e.preventDefault();
+    const state = State.get();
+
+    if (state.isDragging && e.touches.length === 1) {
+      const dx = e.touches[0].clientX - state.lastX;
+      const dy = e.touches[0].clientY - state.lastY;
+      State.update({
+        zoomOriginX: state.zoomOriginX + dx,
+        zoomOriginY: state.zoomOriginY + dy,
+        lastX: e.touches[0].clientX,
+        lastY: e.touches[0].clientY,
+      });
     }
 
     if (e.touches.length === 2) {
@@ -439,289 +431,245 @@ canvas.addEventListener(
         touch2.clientY - touch1.clientY
       );
 
-      if (lastTouchDist) {
-        const zoomChange = touchDist > lastTouchDist ? 1.1 : 0.9;
-        zoomFactor = Math.max(1, Math.min(zoomFactor * zoomChange, 4));
+      if (state.lastTouchDist) {
+        const zoomChange = touchDist > state.lastTouchDist ? 1.1 : 0.9;
+        State.update({
+          zoomFactor: Math.max(1, Math.min(state.zoomFactor * zoomChange, 4)),
+          lastTouchDist: touchDist,
+        });
       }
-      lastTouchDist = touchDist;
     }
-  },
-  { passive: false }
-);
+  };
 
-// Touch-based panning
-canvas.addEventListener(
-  "touchstart",
-  (e) => {
-    e.preventDefault(); // Prevent scroll
+  const handleTouchStart = (e) => {
+    e.preventDefault();
     if (e.touches.length === 1) {
-      isDragging = true;
-      lastX = e.touches[0].clientX;
-      lastY = e.touches[0].clientY;
+      State.update({
+        isDragging: true,
+        lastX: e.touches[0].clientX,
+        lastY: e.touches[0].clientY,
+      });
     }
-  },
-  { passive: false }
-); // Prevent scroll
+  };
 
-canvas.addEventListener(
-  "touchend",
-  (e) => {
+  const handleTouchEnd = (e) => {
     e.preventDefault();
-    lastTouchDist = 0; // Reset distance on touch end
-    isDragging = false;
-  },
-  { passive: false }
-);
-
-canvas.addEventListener(
-  "touchcancel",
-  (e) => {
-    e.preventDefault();
-    isDragging = false;
-  },
-  { passive: false }
-);
-
-// Zoom with mouse
-canvas.addEventListener(
-  "wheel",
-  (e) => {
-    e.preventDefault();
-    const zoomChange = e.deltaY > 0 ? 0.9 : 1.1;
-    zoomFactor = Math.max(1, Math.min(zoomFactor * zoomChange, 5));
-  },
-  { passive: false }
-);
-
-canvas.addEventListener("mousemove", (e) => {
-  e.preventDefault();
-  if (isDragging) {
-    const dx = e.clientX - lastX;
-    const dy = e.clientY - lastY;
-    zoomOriginX += dx;
-    zoomOriginY += dy;
-    lastX = e.clientX;
-    lastY = e.clientY;
-  }
-});
-
-// for zooming while recording
-captureButton.addEventListener("pointermove", (e) => {
-  e.preventDefault();
-  if (recording) {
-    let deltaY = 0;
-    if (e.pointerType === "touch") {
-      // For touch events, manually calculate vertical movement
-      deltaY = -(e.clientY - (lastTouchY || e.clientY));
-      lastTouchY = e.clientY; // Store the current Y position for the next movement
-    } else if (e.pointerType === "mouse") {
-      // For mouse events, use `movementY` directly
-      deltaY = -e.movementY; // Invert movement to match zooming behavior
-    }
-    // Adjust zoomFactor based on the movement
-    zoomFactor = Math.max(1, Math.min(5, zoomFactor + deltaY * 0.01)); // Clamp between 1 and 5
-  }
-});
-
-// for zooming while dragging the canvas
-
-canvas.addEventListener("mouseleave", (e) => {
-  e.preventDefault();
-  isDragging = false;
-});
-
-canvas.addEventListener("mousedown", (e) => {
-  e.preventDefault(); // Prevent scroll
-  lastX = e.clientX;
-  lastY = e.clientY;
-  isDragging = true;
-});
-
-canvas.addEventListener("pointerup", (e) => {
-  e.preventDefault();
-  isDragging = false;
-});
-
-// Capture Button Handling
-captureButton.addEventListener("pointerdown", (e) => {
-  e.preventDefault();
-
-  holdTimeout = setTimeout(() => {
-    startRecording();
-  }, 500); // Hold for 500ms to start video recording
-});
-
-captureButton.addEventListener("pointerup", (e) => {
-  e.preventDefault();
-  clearTimeout(holdTimeout);
-  if (recording) {
-    ProgressInterval = setInterval(() => {
-      updateTopProgressBar();
+    State.update({
+      lastTouchDist: 0,
+      isDragging: false,
     });
-    stopRecording();
-    updateActionButtonLabel("video");
-  }
-  if (!recording && !videoIsDisplayed) {
-    capturePhoto();
-  }
-});
+  };
 
-captureButton.addEventListener("pointercancel", (e) => {
-  e.preventDefault();
-  clearTimeout(holdTimeout);
-  if (recording) {
-    stopRecording();
-  }
-});
+  const handleTouchCancel = (e) => {
+    e.preventDefault();
+    State.update({ isDragging: false });
+  };
 
-// Helper Functions for Capture Button
-function updateActionButtonLabel(mediaType) {
-  if (!isMobile) {
-    actionButton.innerHTML =
-      mediaType === "image" ? "Save Photo" : "Save Video";
-  } else {
-    actionButton.innerHTML =
-      mediaType === "image" ? "Share Photo" : "Share Video";
-  }
-}
+  // Mouse Handling
+  const handleMouseWheel = (e) => {
+    e.preventDefault();
+    const state = State.get();
+    const zoomChange = e.deltaY > 0 ? 0.9 : 1.1;
+    State.update({
+      zoomFactor: Math.max(1, Math.min(state.zoomFactor * zoomChange, 5)),
+    });
+  };
 
-// Capture Photo
-function capturePhoto() {
-  const img = document.getElementById("preview-img");
-  const image = canvas.toDataURL("image/png");
-  img.src = image;
-  img.style.display = "block";
+  const handleMouseMove = (e) => {
+    const state = State.get();
+    if (state.isDragging) {
+      const dx = e.clientX - state.lastX;
+      const dy = e.clientY - state.lastY;
+      State.update({
+        zoomOriginX: state.zoomOriginX + dx,
+        zoomOriginY: state.zoomOriginY + dy,
+        lastX: e.clientX,
+        lastY: e.clientY,
+      });
+    }
+  };
 
-  // Show preview part (photo)
-  previewPart.style.display = "flex";
-  setTimeout(() => {
-    previewPart.style.scale = 1;
-  }, 10);
-  progressParentDiv.style.display = "none";
-  videoCanvas.style.display = "none";
-  controlPannel.style.display = "flex";
-  canvasPart.style.opacity = "0";
-  canvasPart.style.display = "none";
+  const handleMouseDown = (e) => {
+    State.update({
+      isDragging: true,
+      lastX: e.clientX,
+      lastY: e.clientY,
+    });
+  };
 
-  updateActionButtonLabel("image");
-}
+  const handleMouseUp = () => {
+    State.update({ isDragging: false });
+  };
 
-// Back Button Handling
-backButton.addEventListener("click", () => {
-  previewPart.style.scale = 1.3;
-  previewPart.style.display = "none";
-  canvasPart.style.display = "block";
-  videoIsDisplayed = false;
-  clearInterval(videoPlayInterval);
-  setTimeout(() => {
-    canvasPart.style.opacity = 1;
-    resizeSvg();
-  }, 10);
-  clearInterval(ProgressInterval);
-  resetProgress();
-  progressParentDiv.style.display = "none";
-  captureButton.style.display = "flex";
-  controlPannel.style.display = "none";
-  canvasPart.style.display = "block";
-  chunks = [];
-  videoElement.src = "";
-  recorder = null;
-  recording = false;
-});
+  const handleMouseLeave = () => {
+    State.update({ isDragging: false });
+  };
 
-// Custom Action Button
-const actionButton = document.createElement("div");
-actionButton.classList.add("action-btn");
-document.body.appendChild(actionButton);
-controlPannel.appendChild(actionButton);
+  // Capture Button Handling
+  const handleCaptureStart = (e) => {
+    e.preventDefault();
+    State.update({
+      holdTimeout: setTimeout(() => MediaRecorderManager.startRecording(), 500),
+    });
+  };
 
-// Action Button Click Handling
-actionButton.addEventListener("click", async () => {
-  if (videoCanvas.style.display === "block") {
-    // Video is displayed
-    if (!isMobile) {
-      // Desktop: Save video
-      const videoURL = videoElement.src;
+  const handleCaptureEnd = (e) => {
+    e.preventDefault();
+    const state = State.get();
+    clearTimeout(state.holdTimeout);
+
+    if (state.recording) {
+      MediaRecorderManager.stopRecording();
+      UI.updateActionButtonLabel("video");
+    } else if (!state.videoIsDisplayed) {
+      DomElements.videoCanvas.style.display = "none";
+      DomElements.previewPart.style.display = "flex";
+      DomElements.canvasPart.style.display = "none";
+
+      DomElements.progressParentDiv.style.display = "none";
+      DomElements.controlPannel.style.display = "flex";
+      UI.updateActionButtonLabel("image");
+      capturePhoto();
+      setTimeout(() => {
+        DomElements.previewPart.style.scale = "1";
+      }, 10);
+    }
+  };
+
+  const handleCaptureCancel = (e) => {
+    e.preventDefault();
+    const state = State.get();
+    clearTimeout(state.holdTimeout);
+    if (state.recording) MediaRecorderManager.stopRecording();
+  };
+
+  // Photo Capture
+  const capturePhoto = () => {
+    DomElements.previewImg.src = DomElements.canvas.toDataURL("image/png");
+    DomElements.previewPart.style.display = "flex";
+    DomElements.videoCanvas.style.display = "none";
+    DomElements.progressParentDiv.style.display = "none";
+    DomElements.controlPannel.style.display = "flex";
+    UI.updateActionButtonLabel("image");
+  };
+
+  // Back Button
+  const handleBackClick = () => {
+    State.update({
+      videoIsDisplayed: false,
+      zoomFactor: 1.1,
+    });
+
+    DomElements.previewPart.style.display = "none";
+    DomElements.canvasPart.style.display = "block";
+    DomElements.captureButton.style.display = "flex";
+    DomElements.previewPart.style.scale = "1.3";
+    VideoManager.stopVideoPlayback();
+    ProgressManager.resetProgress();
+  };
+
+  // Action Button
+  const handleActionClick = async () => {
+    const state = State.get();
+    if (DomElements.videoCanvas.style.display === "block") {
+      await handleVideoAction();
+    } else {
+      await handlePhotoAction();
+    }
+  };
+
+  const handleVideoAction = async () => {
+    const videoURL = DomElements.videoElement.src;
+    if (Utils.isMobile) {
+      await shareMedia(videoURL, "video/webm", "video.webm");
+    } else {
       const a = document.createElement("a");
       a.href = videoURL;
       a.download = "video.webm";
       a.click();
+    }
+  };
+
+  const handlePhotoAction = async () => {
+    const imgSrc = DomElements.previewImg.src;
+    if (Utils.isMobile) {
+      await shareMedia(imgSrc, "image/png", "photo.png");
     } else {
-      // Mobile: Share video
-      try {
-        const response = await fetch(videoElement.src);
-        const blob = await response.blob();
-        
-        //v1 fiverr
-        // const files = [new File([blob], "video.webm", { type: "video/webm" })];
-        // await navigator.share({ files });
-
-        //v2 baba
-        const file = new File([blob], "video.mp4", { type: "video/mp4" });
-        await navigator.share({
-          // title: "Example File",
-          files: [file]
-        });
-      } catch (err) {
-        console.error("Error sharing video", err);
-      }
+      const a = document.createElement("a");
+      a.href = imgSrc;
+      a.download = "photo.png";
+      a.click();
     }
-  } else {
-    // Photo is displayed
-    const img = document.querySelector(".preview-img");
-    if (img) {
-      if (!isMobile) {
-        // Desktop: Save photo
-        const a = document.createElement("a");
-        a.href = img.src;
-        a.download = "photo.png";
-        a.click();
-      } else {
-        // Mobile: Share photo
-        try {
-          const response = await fetch(img.src);
-          const blob = await response.blob();
-          const files = [new File([blob], "photo.png", { type: "image/png" })];
-          await navigator.share({ files });
-        } catch (err) {
-          console.error("Error sharing photo", err);
-        }
-      }
+  };
+
+  const shareMedia = async (src, type, filename) => {
+    try {
+      const response = await fetch(src);
+      const blob = await response.blob();
+      const file = new File([blob], filename, { type });
+      await navigator.share({ files: [file] });
+    } catch (err) {
+      console.error("Sharing failed:", err);
     }
-  }
-});
+  };
 
-// Initialize Action Button Label
-updateActionButtonLabel("");
+  // Resize Handler
+  const handleResize = () => {
+    DomElements.canvas.width = window.innerWidth;
+    DomElements.canvas.height = window.innerHeight;
+    State.update({
+      zoomOriginX: DomElements.canvas.width / 2,
+      zoomOriginY: DomElements.canvas.height / 2,
+    });
+  };
 
-// MediaRecorder Support Check for Safari
-if (isSafari && typeof MediaRecorder === "undefined") {
-  alert("Video recording is not supported in Safari.");
-}
+  return { initialize };
+})();
 
-// Video Progress Bar Update
-function updateTopProgressBar() {
-  const currentTime = videoElement.currentTime;
-  const duration = videoElement.duration;
-  // Ensure duration is valid before updating the progress bar
-  const progress = Math.min((currentTime / duration) * 100, 100);
-  videoProgressBar.style.width = `${progress}%`;
-}
+// ======================
+// Module 8: UI Management
+// ======================
+const UI = (() => {
+  const updateActionButtonLabel = (mediaType) => {
+    DomElements.actionButton.textContent = Utils.isMobile
+      ? mediaType === "image"
+        ? "Share Photo"
+        : "Share Video"
+      : mediaType === "image"
+      ? "Save Photo"
+      : "Save Video";
+  };
 
-// Prevent default touch actions on the entire document to enhance gesture handling
-document.addEventListener(
-  "touchmove",
-  (e) => {
-    e.preventDefault();
-  },
-  { passive: false }
-);
+  const resizeSvg = (scale = 1) => {
+    const innerCircle = document.querySelector(".inner-circle");
+    const outerCircle = document.querySelector(".outer-circle");
+    if (innerCircle) {
+      innerCircle.style.transform = `scale(${scale})`;
+    }
+    if (outerCircle) {
+      outerCircle.style.transition = "all 0.3s ease";
+    }
+  };
 
-//prevent default selection of text
-captureButton.addEventListener(
-  "touchstart",
-  (e) => {
-    e.preventDefault();
-  },
-  { passive: false }
-);
+  return { updateActionButtonLabel, resizeSvg };
+})();
+
+// ======================
+// Initialize Application
+// ======================
+const App = (() => {
+  const init = () => {
+    EventHandlers.initialize();
+    // handleResize();
+    // Initial visibility states
+    DomElements.canvasPart.style.opacity = 1;
+    DomElements.controlPannel.style.display = "none";
+    DomElements.progressParentDiv.style.display = "none";
+    // requestAnimationFrame(CanvasRenderer.draw);
+  };
+
+  return { init };
+})();
+
+// Start the app
+App.init();
