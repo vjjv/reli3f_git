@@ -756,7 +756,7 @@ const App = (() => {
     DomElements.canvasPart.style.opacity = 1;
     DomElements.controlPannel.style.display = "none";
     DomElements.progressParentDiv.style.display = "none";
-    requestAnimationFrame(CanvasRenderer.draw);
+    // requestAnimationFrame(CanvasRenderer.draw);
   };
 
   return { init };
