@@ -177,6 +177,7 @@ async function startRecording() {
     });
     recorder.startRecording();
     recording = true;
+    updateProgress(); // baba test
     // change the default behaviour of capture button to act as a zoom plate while recording
     if (recording) {
       resizeSvg(1.1);
@@ -258,6 +259,7 @@ function updateProgress() {
     stopRecording();
     resetProgress();
   }
+  while(recording) updateProgress(); //baba test
 }
 
 function resetProgress() {
@@ -298,7 +300,7 @@ function draw(timestamp) {
 
 
 
-  requestAnimationFrame(draw);
+  // requestAnimationFrame(draw);
 }
 
 function resizeCanvas() {
@@ -311,7 +313,7 @@ function resizeCanvas() {
 // Initialize canvas size and start animation
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
-requestAnimationFrame(draw); //bkp to comment
+// requestAnimationFrame(draw); //bkp to comment
 
 // Heart management
 function addHeart() {
