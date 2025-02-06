@@ -285,7 +285,7 @@ function draw(timestamp) {
     // Clear canvas
    
     // Apply zoom and pan
-    ctx.setTransform(zoomFactor, 0, 0, zoomFactor, zoomOriginX, zoomOriginY);
+    // ctx.setTransform(zoomFactor, 0, 0, zoomFactor, zoomOriginX, zoomOriginY);
 
     // Draw text
     
