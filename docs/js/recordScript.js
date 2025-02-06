@@ -320,135 +320,44 @@ const VideoManager = (() => {
 // ======================
 // Module 6: Canvas Drawing
 // ======================
-// const CanvasRenderer = (() => {
-//   const draw = (timestamp) => {
-//     const state = State.get();
-//     const timeSinceLastRender = timestamp - state.lastRenderTime;
+const CanvasRenderer = (() => {
+  const draw = (timestamp) => {
+    const state = State.get();
+    const timeSinceLastRender = timestamp - state.lastRenderTime;
 
-//     if (timeSinceLastRender >= state.frameDuration) {
-//       DomElements.ctx.save();
-//       DomElements.ctx.clearRect(
-//         0,
-//         0,
-//         DomElements.canvas.width,
-//         DomElements.canvas.height
-//       );
-//       DomElements.ctx.fillStyle = state.linearGradient;
-//       DomElements.ctx.fillRect(
-//         0,
-//         0,
-//         DomElements.canvas.width,
-//         DomElements.canvas.height
-//       );
+    if (timeSinceLastRender >= state.frameDuration) {
+      
 
-//       // Apply zoom/pan transformations
-//       DomElements.ctx.setTransform(
-//         state.zoomFactor,
-//         0,
-//         0,
-//         state.zoomFactor,
-//         state.zoomOriginX,
-//         state.zoomOriginY
-//       );
+      // Apply zoom/pan transformations
+      DomElements.ctx.setTransform(
+        state.zoomFactor,
+        0,
+        0,
+        state.zoomFactor,
+        state.zoomOriginX,
+        state.zoomOriginY
+      );
 
-//       // Draw text
-//       DomElements.ctx.font = `${40 * state.zoomFactor}px sans`;
-//       DomElements.ctx.textAlign = "center";
-//       DomElements.ctx.textBaseline = "middle";
-//       DomElements.ctx.fillStyle = "white";
-//       DomElements.ctx.fillText("Hi, Bastein", 0, 0);
-//       DomElements.ctx.restore();
+     
 
-//       // Update progress if recording
-//       if (state.recording) ProgressManager.updateProgress();
+      // Update progress if recording
+      if (state.recording) ProgressManager.updateProgress();
 
-//       State.update({ lastRenderTime: timestamp });
-//     }
+      State.update({ lastRenderTime: timestamp });
+    }
 
-//     // animateHearts();
-//     // addHeart();
-//     requestAnimationFrame(draw);
-//   };
+    // animateHearts();
+    // addHeart();
+    requestAnimationFrame(draw);
+  };
 
-//   // Heart animation functions
-//   const addHeart = () => {
-//     const state = State.get();
-//     if (state.hearts.length >= 5) return;
 
-//     state.hearts.push({
-//       x: Math.random() * DomElements.canvas.width,
-//       y: Math.random() * DomElements.canvas.height,
-//       size: Math.random() * 25 + 15,
-//       opacity: Math.random() * 0.5 + 0.5,
-//       speed: Math.random() * 2 + 0.5,
-//       gradient: createPurpleGradient(),
-//       glow: true,
-//       glowIntensity: 20,
-//       glowDirection: 1,
-//       glowSpeed: 0.8,
-//     });
-//   };
 
-//   const createPurpleGradient = () => {
-//     const gradient = DomElements.ctx.createRadialGradient(0, 0, 5, 0, 0, 20);
-//     gradient.addColorStop(0, "rgba(128, 0, 128, 0.9)");
-//     gradient.addColorStop(1, "rgba(230, 230, 250, 0.8)");
-//     return gradient;
-//   };
 
-//   const animateHearts = () => {
-//     const state = State.get();
-//     state.hearts.forEach((heart, index) => {
-//       DomElements.ctx.save();
-//       DomElements.ctx.globalAlpha = heart.opacity;
+  
 
-//       // Glow effect logic
-//       heart.glowIntensity += heart.glowDirection * heart.glowSpeed;
-//       if (heart.glowIntensity >= 30) heart.glowDirection = -1.5;
-//       else if (heart.glowIntensity <= 5) heart.glowDirection = 1;
-
-//       DomElements.ctx.shadowBlur = heart.glowIntensity;
-//       DomElements.ctx.shadowColor = "rgba(255, 0, 255, 0.8)";
-
-//       // Position adjustment for zoom
-//       const adjustedX =
-//         (heart.x - state.zoomOriginX) * state.zoomFactor + state.zoomOriginX;
-//       const adjustedY =
-//         (heart.y - state.zoomOriginY) * state.zoomFactor + state.zoomOriginY;
-
-//       DomElements.ctx.translate(adjustedX, adjustedY);
-//       DomElements.ctx.fillStyle =
-//         heart.glowIntensity > 10 ? heart.gradient : "rgba(255, 255, 255, 0.2)";
-
-//       drawHeart(DomElements.ctx, 0, 0, heart.size);
-//       DomElements.ctx.restore();
-
-//       // Update position
-//       heart.y -= heart.speed;
-//       if (heart.y + heart.size < 0) state.hearts.splice(index, 1);
-//     });
-//   };
-
-//   const drawHeart = (ctx, x, y, size) => {
-//     ctx.beginPath();
-//     ctx.moveTo(x, y + size / 4);
-//     ctx.bezierCurveTo(x, y, x - size / 2, y, x - size / 2, y + size / 4);
-//     ctx.bezierCurveTo(x - size / 2, y + size / 2, x, y + size / 2, x, y + size);
-//     ctx.bezierCurveTo(
-//       x,
-//       y + size / 2,
-//       x + size / 2,
-//       y + size / 2,
-//       x + size / 2,
-//       y + size / 4
-//     );
-//     ctx.bezierCurveTo(x + size / 2, y, x, y, x, y + size / 4);
-//     ctx.closePath();
-//     ctx.fill();
-//   };
-
-//   return { draw };
-// })();
+  return { draw };
+})();
 
 // ======================
 // Module 7: Event Handlers
