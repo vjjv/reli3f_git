@@ -1,4 +1,4 @@
-// Select DOM elements
+// Select DOM elementss
 const canvasPart = document.querySelector(".canvas-part");
 const previewPart = document.querySelector(".preview-part");
 const canvas = document.getElementById("canvas");
@@ -9,7 +9,7 @@ const backButton = document.getElementById("backButton");
 const progressParentDiv = document.querySelector(".progress-parent");
 const videoProgressBar = document.getElementById("videoProgressBar");
 const progressRing = document.getElementById("progressRing");
-const controlPannel = document.querySelector(".controls");
+const controlPannel = document.querySelector(".controls"); 
 
 // Initialize variables
 
