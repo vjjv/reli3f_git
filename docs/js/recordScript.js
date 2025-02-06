@@ -276,40 +276,30 @@ function resetProgress() {
 
 // ctx.fillStyle = linearGradient;
 // ctx.fillRect(0, 0, canvas.width, canvas.height);
+
 // Drawing and animation
-// function draw(timestamp) {
-//   const timeSinceLastRender = timestamp - lastRenderTime;
+function draw(timestamp) {
+  const timeSinceLastRender = timestamp - lastRenderTime;
 
-//   if (timeSinceLastRender >= frameDuration) {
-//     // Clear canvas
-//     ctx.save();
-//     ctx.clearRect(0, 0, canvas.width, canvas.height);
-//     ctx.fillStyle = linearGradient;
-//     ctx.fillRect(0, 0, canvas.width, canvas.height);
-//     // Apply zoom and pan
-//     ctx.setTransform(zoomFactor, 0, 0, zoomFactor, zoomOriginX, zoomOriginY);
+  if (timeSinceLastRender >= frameDuration) {
+    // Clear canvas
+   
+    // Apply zoom and pan
+    ctx.setTransform(zoomFactor, 0, 0, zoomFactor, zoomOriginX, zoomOriginY);
 
-//     // Draw text
-//     ctx.font = `${40 * zoomFactor}px sans`;
-//     ctx.textAlign = "center";
-//     ctx.textBaseline = "middle";
-//     ctx.fillStyle = "white";
-//     ctx.fillText("Hello world", 0, 0);
-//     ctx.restore();
+    // Draw text
+    
+    // Update progress bar if recording
+    if (recording) {
+      updateProgress();
+    }
+    lastRenderTime = timestamp;
+  }
 
-//     // Update progress bar if recording
-//     if (recording) {
-//       updateProgress();
-//     }
-//     lastRenderTime = timestamp;
-//   }
 
-  // Animate hearts
-  // animateHearts();
-  // addHeart();
 
-  // requestAnimationFrame(draw);
-// }
+  requestAnimationFrame(draw);
+}
 
 function resizeCanvas() {
   canvas.width = window.innerWidth;
@@ -321,7 +311,7 @@ function resizeCanvas() {
 // Initialize canvas size and start animation
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
-// requestAnimationFrame(draw);
+requestAnimationFrame(draw); //bkp to comment
 
 // Heart management
 function addHeart() {
