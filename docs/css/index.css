@@ -68,3 +68,7 @@ body {
   .poweredbysnap-logo > img {
     width: 100px;
   }
+
+  #flip{
+    z-index: 1;
+  }
