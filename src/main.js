@@ -10,12 +10,12 @@ import {
 
 const liveRenderTarget = document.getElementById('canvas');
 const flipCamera = document.getElementById('flip');
-const intro = document.getElementById('intro');
+const intro = document.getElementById('intro-bg');
 var firstTime = true;
 document.body.addEventListener('click', () => {
     if (firstTime) {
         firstTime = false;
-        // DeviceMotionEvent.requestPermission();
+        if (typeof DeviceMotionEvent.requestPermission === 'function') DeviceMotionEvent.requestPermission();
         intro.style.display = 'none';
         init();
     }
