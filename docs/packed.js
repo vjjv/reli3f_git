@@ -30403,6 +30403,8 @@ var firstTime = true;
 document.body.addEventListener('click', () => {
     if (firstTime) {
         firstTime = false;
+        DeviceMotionEvent.requestPermission();
+        intro.style.display = 'none';
         init();
     }
 }, true);
