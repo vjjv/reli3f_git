@@ -90,7 +90,7 @@ body {
   height: 100%;
   z-index: 1;
   position: absolute;
-  background-image: url("../assets/blur-bg.jpg");
+  background-image: url("../assets/blur-bg.png");
   ;
   background-repeat: no-repeat;
   background-attachment: fixed;
