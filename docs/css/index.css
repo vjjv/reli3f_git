@@ -72,3 +72,11 @@ body {
   #flip{
     z-index: 1;
   }
+
+  .reverse-cam{
+    position: absolute;
+    bottom: 1px;
+    right: 1px;
+    scale: 0.5;
+    z-index: 1;
+  }

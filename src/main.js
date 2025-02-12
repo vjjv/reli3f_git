@@ -69,7 +69,7 @@ import {
 const liveRenderTarget = document.getElementById('canvas') ;
 const flipCamera = document.getElementById('flip');
 
-let isBackFacing = true;
+let isBackFacing = false;
 let mediaStream;
 
 async function init() {
@@ -100,9 +100,9 @@ function bindFlipCamera(session) {
 async function updateCamera(session) {
     isBackFacing = !isBackFacing;
 
-    flipCamera.innerText = isBackFacing
-        ? 'Switch to Front Camera'
-        : 'Switch to Back Camera';
+    // flipCamera.innerText = isBackFacing
+        // ? 'Switch to Front Camera'
+        // : 'Switch to Back Camera';
 
     if (mediaStream) {
         session.pause();
