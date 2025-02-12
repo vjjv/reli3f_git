@@ -66,8 +66,17 @@ import {
     Transform2D,
 } from '@snap/camera-kit';
 
-const liveRenderTarget = document.getElementById('canvas') ;
+const liveRenderTarget = document.getElementById('canvas');
 const flipCamera = document.getElementById('flip');
+const intro = document.getElementById('intro');
+var firstTime = true;
+document.body.addEventListener('click', () => {
+    if (firstTime) {
+        firstTime = false;
+        init();
+    }
+}, true);
+
 
 let isBackFacing = true;
 let mediaStream;
@@ -98,35 +107,35 @@ function bindFlipCamera(session) {
 }
 
 async function updateCamera(session) {
-    
+
     // flipCamera.innerText = isBackFacing
     // ? 'Switch to Front Camera'
     // : 'Switch to Back Camera';
-    
+
     if (mediaStream) {
         session.pause();
         mediaStream.getVideoTracks()[0].stop();
     }
-    
+
     mediaStream = await navigator.mediaDevices.getUserMedia({
         video: {
             facingMode: isBackFacing ? 'environment' : 'user',
         },
     });
-    
+
     const source = createMediaStreamSource(mediaStream, {
         // NOTE: This is important for world facing experiences
         cameraType: isBackFacing ? 'back' : 'front',
     });
-    
+
     await session.setSource(source);
-    
+
     if (!isBackFacing) {
         source.setTransform(Transform2D.MirrorX);
     }
-    
+
     session.play();
     isBackFacing = !isBackFacing;
 }
 
-init();
+// init();
