@@ -80,3 +80,7 @@ body {
     scale: 0.5;
     z-index: 1;
   }
+
+  * {
+    touch-action: manipulation;
+}

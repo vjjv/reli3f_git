@@ -1,96 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AR Filter ✨</title>
-    <link rel="stylesheet" href="css/index.css" >
-    <link rel="stylesheet" href="css/record-style.css" />
-    
-  </head>
-  <body>
 
-    <span id="flip"></span>
-    <div id="flip" class="reverse-cam"><img src="assets/reverse_cam.png" alt=""></div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AR Filter ✨</title>
+  <link rel="stylesheet" href="css/index.css">
+  <link rel="stylesheet" href="css/record-style.css" />
 
-    <!-- Preview Section -->
-    <div class="container">
-      <section id="preview-part" class="preview-part">
-        <img
-          src="assets/spin.gif"
-          alt="loading"
-          class="spin-loading"
-          style="display: none"
-        />
-        <div class="preview">
-          <!-- Video Progress Bar -->
-          <div class="progress-parent">
-            <div class="video-progress-bar-sudo">
-              <div class="video-progress-bar" id="videoProgressBar"></div>
-            </div>
+</head>
+
+<body>
+
+  <span id="flip"></span>
+  <div id="flip" class="reverse-cam"><img src="assets/reverse_cam.png" alt=""></div>
+
+  <!-- Preview Section -->
+  <div class="container">
+    <section id="preview-part" class="preview-part">
+      <img src="assets/spin.gif" alt="loading" class="spin-loading" style="display: none" />
+      <div class="preview">
+        <!-- Video Progress Bar -->
+        <div class="progress-parent">
+          <div class="video-progress-bar-sudo">
+            <div class="video-progress-bar" id="videoProgressBar"></div>
           </div>
-          <!-- Preview Image or Canvas -->
-          <img
-            src=""
-            alt="Preview Image"
-            id="preview-img"
-            class="preview-img"
-          />
-          <canvas id="videoCanvas" class="video-canvas"></canvas>
         </div>
-        <!-- Control Bar -->
-        <div class="controls">
-          <!-- Back Button -->
-          <img
-            src="assets/back.png"
-            alt="Back"
-            class="back-btn"
-            id="backButton"
-          />
-          <!-- Action Button will be dynamically added here -->
-        </div>
-      </section>
+        <!-- Preview Image or Canvas -->
+        <img src="" alt="Preview Image" id="preview-img" class="preview-img" />
+        <canvas id="videoCanvas" class="video-canvas"></canvas>
+      </div>
+      <!-- Control Bar -->
+      <div class="controls">
+        <!-- Back Button -->
+        <img src="assets/back.png" alt="Back" class="back-btn" id="backButton" />
+        <!-- Action Button will be dynamically added here -->
+      </div>
+    </section>
 
-      <!-- Capture Section -->
-      <section class="canvas-part">
-        <!-- Progress Bar -->
-        <div class="progress-bar" id="progressBar"></div>
-        <!-- Canvas -->
-        <canvas id="canvas" class="active"></canvas>
+    <!-- Capture Section -->
+    <section class="canvas-part">
+      <!-- Progress Bar -->
+      <div class="progress-bar" id="progressBar"></div>
+      <!-- Canvas -->
+      <canvas id="canvas" class="active"></canvas>
 
-        <!-- Capture Button with SVG -->
-        <div class="capture-btn" id="captureButton">
-          <svg
-            id="progressRing"
-            class="progress-ring"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <circle
-              class="outer-circle"
-              stroke="rgba(255, 255, 255,0.9)"
-              stroke-width="3"
-              fill="none"
-            />
-            <circle
-              class="progress-ring__circle"
-              stroke="rgb(255, 0, 0)"
-              stroke-width="3"
-              fill="none"
-            />
-            <circle class="inner-circle" fill="rgba(255, 255, 255,0.9)" />
-          </svg>
-        </div>
-      </section>
-    </div>
+      <!-- Capture Button with SVG -->
+      <div class="capture-btn" id="captureButton">
+        <svg id="progressRing" class="progress-ring" xmlns="http://www.w3.org/2000/svg">
+          <circle class="outer-circle" stroke="rgba(255, 255, 255,0.9)" stroke-width="3" fill="none" />
+          <circle class="progress-ring__circle" stroke="rgb(255, 0, 0)" stroke-width="3" fill="none" />
+          <circle class="inner-circle" fill="rgba(255, 255, 255,0.9)" />
+        </svg>
+      </div>
+    </section>
+  </div>
 
-    <div class="poweredbysnap-logo" >
-      <img id="image" src="./assets/Powered_bysnap.png" alt="Powered by Snap">
-    </div>
+  <div class="poweredbysnap-logo">
+    <img id="image" src="./assets/Powered_bysnap.png" alt="Powered by Snap">
+  </div>
 
-    <!-- External Scripts -->
-    <script src="./packed.js"></script>
-    <script src="js/resizeSvg.js"></script>
-    <script src="js/recordAPI.js"></script>
-    <script src="js/recordScript.js"></script>
-  </body>
+  <!-- External Scripts -->
+  <script src="./packed.js"></script>
+  <script src="js/resizeSvg.js"></script>
+  <script src="js/recordAPI.js"></script>
+  <script src="js/recordScript.js"></script>
+
+</body>
+
 </html>

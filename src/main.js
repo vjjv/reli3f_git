@@ -69,7 +69,7 @@ import {
 const liveRenderTarget = document.getElementById('canvas') ;
 const flipCamera = document.getElementById('flip');
 
-let isBackFacing = false;
+let isBackFacing = true;
 let mediaStream;
 
 async function init() {
@@ -98,35 +98,35 @@ function bindFlipCamera(session) {
 }
 
 async function updateCamera(session) {
-    isBackFacing = !isBackFacing;
-
+    
     // flipCamera.innerText = isBackFacing
-        // ? 'Switch to Front Camera'
-        // : 'Switch to Back Camera';
-
+    // ? 'Switch to Front Camera'
+    // : 'Switch to Back Camera';
+    
     if (mediaStream) {
         session.pause();
         mediaStream.getVideoTracks()[0].stop();
     }
-
+    
     mediaStream = await navigator.mediaDevices.getUserMedia({
         video: {
             facingMode: isBackFacing ? 'environment' : 'user',
         },
     });
-
+    
     const source = createMediaStreamSource(mediaStream, {
         // NOTE: This is important for world facing experiences
         cameraType: isBackFacing ? 'back' : 'front',
     });
-
+    
     await session.setSource(source);
-
+    
     if (!isBackFacing) {
         source.setTransform(Transform2D.MirrorX);
     }
-
+    
     session.play();
+    isBackFacing = !isBackFacing;
 }
 
 init();
