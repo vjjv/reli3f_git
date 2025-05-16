@@ -26,4 +26,4 @@ console.log('groupID : '+ window.lensID);
 console.log('modePhoto : '+ window.modePhoto);
 console.log('modeVideo : '+ window.modeVideo);
 console.log('modeBothCamera : '+ window.modeBothCamera);
-console.log('modeStartFaceCamera : '+ window.startFaceCamera);
+console.log('modeStartFaceCamera : '+ window.modeStartFaceCamera);
