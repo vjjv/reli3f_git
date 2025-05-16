@@ -26,7 +26,7 @@ window.modePhoto = getURLorFallback('modePhoto', true);
 window.modeVideo = getURLorFallback('modeVideo', true);
 window.modeBothCamera = getURLorFallback('modeBothCamera', true);
 window.modeStartFaceCamera = getURLorFallback('modeStartFaceCamera', false);
-window.spashScreen = getURLorFallback('splashScreen', 'https://vjjv.github.io/reli3f_git/assets/intro.png');
+window.splashScreen = getURLorFallback('splashScreen', 'https://vjjv.github.io/reli3f_git/assets/intro.png');
 
 console.log('lensID : ' + window.lensID);
 console.log('groupID : ' + window.groupID);
