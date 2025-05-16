@@ -30369,13 +30369,7 @@ async function init() {
     // ]);
     // session.applyLens(lenses[0]);
 
-    // Load via Lens ID
-    // const lens = await cameraKit.lensRepository.loadLens(
-    //     'b8e614e9-bd59-429b-94a8-05ae9385210a', //Third Sky Lens
-    //     'f7f4e367-f4b3-4de5-8e81-e9c842f2bf0b' //LIVE_PROD Group
-    // );
-    console.log('LENS ID : '+window.lensID);
-    console.log('GROUP ID : '+window.groupID);
+
     const lens = await cameraKit.lensRepository.loadLens(
         window.lensID, //Lens ID
         window.groupID //Group ID
