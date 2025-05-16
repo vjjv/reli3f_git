@@ -19,3 +19,11 @@ window.modePhoto = getURLorFallback('modePhoto', true) === 'true';
 window.modeVideo = getURLorFallback('modeVideo', true) === 'true';
 window.modeBothCamera = getURLorFallback('modeBothCamera', true) === 'true';
 window.modeStartFaceCamera = getURLorFallback('modeStartFaceCamera', false) === 'true';
+
+
+console.log('lensID : '+ window.lensID);
+console.log('groupID : '+ window.lensID);
+console.log('modePhoto : '+ window.modePhoto);
+console.log('modeVideo : '+ window.modeVideo);
+console.log('modeBothCamera : '+ window.modeBothCamera);
+console.log('modeStartFaceCamera : '+ window.startFaceCamera);
