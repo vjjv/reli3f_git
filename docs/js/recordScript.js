@@ -13,13 +13,13 @@ const progressRing = document.getElementById("progressRing");
 const controlPannel = document.querySelector(".controls");
 
 if(!window.modePhoto && !window.modeVideo){
-  captureButton.style.display = 'none !important';
+  captureButton.style.display = 'none';
 }
 
 if(window.modeFaceCamera && window.modeBackCamera){
-  flipButton.style.display = 'block !important';
+  flipButton.style.display = 'block';
 }else {
-  flipButton.style.display = 'none !important';
+  flipButton.style.display = 'none';
 }
 
 // Initialize variables
