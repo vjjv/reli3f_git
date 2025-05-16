@@ -5,6 +5,7 @@ const canvas = document.getElementById("canvas");
 // const canvas = document.querySelector('.canvas-part canvas');
 // const ctx = canvas.getContext("2d");
 const captureButton = document.getElementById("captureButton");
+const flipButton = document.getElementById("flip");
 const backButton = document.getElementById("backButton");
 const progressParentDiv = document.querySelector(".progress-parent");
 const videoProgressBar = document.getElementById("videoProgressBar");
@@ -13,6 +14,12 @@ const controlPannel = document.querySelector(".controls");
 
 if(!window.modePhoto && !window.modeVideo){
   captureButton.style.display = 'none !important';
+}
+
+if(window.modeFaceCamera && window.modeBackCamera){
+  flipButton.style.display = 'block !important';
+}else {
+  flipButton.style.display = 'none !important';
 }
 
 // Initialize variables

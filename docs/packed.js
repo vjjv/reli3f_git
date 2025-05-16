@@ -30352,7 +30352,7 @@ document.body.addEventListener('click', () => {
 }, true);
 
 
-let isBackFacing = true;
+let isBackFacing = !window.modeStartFaceCamera;
 let mediaStream;
 
 async function init() {
