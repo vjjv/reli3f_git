@@ -32,11 +32,19 @@ async function init() {
     });
 
     const session = await cameraKit.createSession({ liveRenderTarget });
-    const { lenses } = await cameraKit.lensRepository.loadLensGroups([
-        'f7f4e367-f4b3-4de5-8e81-e9c842f2bf0b',
-    ]);
 
-    session.applyLens(lenses[0]);
+    //Load via Lens Group
+    // const { lenses } = await cameraKit.lensRepository.loadLensGroups([
+    // 'f7f4e367-f4b3-4de5-8e81-e9c842f2bf0b',
+    // ]);
+    // session.applyLens(lenses[0]);
+
+    // Load via Lens ID
+    const lens = await cameraKit.lensRepository.loadLens(
+        'b8e614e9-bd59-429b-94a8-05ae9385210a', //Third Sky Lens
+        'f7f4e367-f4b3-4de5-8e81-e9c842f2bf0b' //LIVE_PROD Group
+    );
+    await session.applyLens(lens);
 
     bindFlipCamera(session);
 }
