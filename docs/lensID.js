@@ -22,16 +22,18 @@ function getURLorFallback(key, defaultValue) {
 
 window.lensID = getURLorFallback('lensID', 'b8e614e9-bd59-429b-94a8-05ae9385210a'); // Third Sky Lens
 window.groupID = getURLorFallback('groupID', 'f7f4e367-f4b3-4de5-8e81-e9c842f2bf0b'); // LIVE_PROD Group
-window.spashScreen = getURLorFallback('splashScreen', 'https://vjjv.github.io/reli3f_git/assets/intro.png');
 window.modePhoto = getURLorFallback('modePhoto', true);
 window.modeVideo = getURLorFallback('modeVideo', true);
 window.modeBothCamera = getURLorFallback('modeBothCamera', true);
 window.modeStartFaceCamera = getURLorFallback('modeStartFaceCamera', false);
+window.spashScreen = getURLorFallback('splashScreen', 'https://vjjv.github.io/reli3f_git/assets/intro.png');
 
 console.log('lensID : ' + window.lensID);
 console.log('groupID : ' + window.groupID);
-console.log('splashScreen : ' + window.splashScreen);
 console.log('modePhoto : ' + window.modePhoto);
 console.log('modeVideo : ' + window.modeVideo);
 console.log('modeBothCamera : ' + window.modeBothCamera);
 console.log('modeStartFaceCamera : ' + window.modeStartFaceCamera);
+console.log('splashScreen : ' + window.splashScreen);
+
+document.getElementById('splash-img').src = window.splashScreen;
