@@ -16,7 +16,7 @@ if(!window.modePhoto && !window.modeVideo){
   captureButton.style.display = 'none';
 }
 
-if(window.modeFaceCamera && window.modeBackCamera){
+if(window.modeBothCamera){
   flipButton.style.display = 'block';
 }else {
   flipButton.style.display = 'none';
