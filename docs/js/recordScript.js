@@ -11,6 +11,10 @@ const videoProgressBar = document.getElementById("videoProgressBar");
 const progressRing = document.getElementById("progressRing");
 const controlPannel = document.querySelector(".controls");
 
+if(!window.modePhoto && !window.modeVideo){
+  captureButton.style.display = 'none !important';
+}
+
 // Initialize variables
 
 // video recording related variables
@@ -285,12 +289,12 @@ function draw(timestamp) {
 
   if (timeSinceLastRender >= frameDuration) {
     // Clear canvas
-   
+
     // Apply zoom and pan
     // ctx.setTransform(zoomFactor, 0, 0, zoomFactor, zoomOriginX, zoomOriginY);
 
     // Draw text
-    
+
     // Update progress bar if recording
     if (recording) {
       updateProgress();
@@ -538,9 +542,11 @@ canvas.addEventListener("pointerup", (e) => {
 captureButton.addEventListener("pointerdown", (e) => {
   e.preventDefault();
 
-  holdTimeout = setTimeout(() => {
-    startRecording();
-  }, 500); // Hold for 500ms to start video recording
+  if (window.modeVideo) {
+    holdTimeout = setTimeout(() => {
+      startRecording();
+    }, 500); // Hold for 500ms to start video recording
+  }
 });
 
 captureButton.addEventListener("pointerup", (e) => {
@@ -643,7 +649,7 @@ actionButton.addEventListener("click", async () => {
       try {
         const response = await fetch(videoElement.src);
         const blob = await response.blob();
-        
+
         //v1 fiverr
         // const files = [new File([blob], "video.webm", { type: "video/webm" })];
         // await navigator.share({ files });
